@@ -24,16 +24,46 @@ Build a 3-VM Windows lab environment with Active Directory and Group Policy for 
 - Network Subnet: TBD
 - DNS: DC01 will serve as primary DNS
 
-## Key Questions
-1. Which hypervisor to use? (Hyper-V, VirtualBox, VMware, Proxmox, etc.)
-2. Windows Server version? (2019, 2022, Evaluation?)
-3. Client OS version? (Windows 10, 11, Evaluation?)
-4. Domain name to use?
-5. Network configuration (NAT, bridged, internal?)
-6. Specific GPOs to implement and document?
+## Questions to Answer Before Starting
+
+Fill these in before beginning the lab:
+
+### 1. Hypervisor
+**Options:** VirtualBox, VMware Workstation, Hyper-V, Proxmox, libvirt/KVM
+**Your choice:** _____________
+
+### 2. Windows Server Version
+**Options:** Server 2019, Server 2022, Evaluation ISO (free 180 days)
+**Your choice:** _____________
+
+### 3. Client OS Version
+**Options:** Windows 10, Windows 11, Evaluation ISO
+**Your choice:** _____________
+
+### 4. Domain Name
+**Examples:** lab.local, homelab.internal, yourname.local
+**Your choice:** _____________
+
+### 5. Network Configuration
+**Options:**
+- **NAT** - VMs share host's internet, isolated from LAN
+- **Bridged** - VMs get IPs on your home network
+- **Internal/Host-only** - VMs only talk to each other and host
+**Your choice:** _____________
+
+### 6. GPO Focus Areas
+**Pick which to prioritize (or all):**
+- [ ] Password & account lockout policies
+- [ ] Software restriction / AppLocker
+- [ ] Drive mappings & folder redirection
+- [ ] Desktop branding (wallpaper, lock screen)
+- [ ] Windows Update policies (WSUS simulation)
+- [ ] Security settings & audit policies
+- [ ] User rights assignments
+- [ ] Other: _____________
 
 ## Decisions Made
-- [Pending user input on infrastructure choices]
+- (Will be filled after answering questions above)
 
 ## GPO Learning Goals
 - [ ] Password policies
