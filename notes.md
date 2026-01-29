@@ -98,7 +98,11 @@ gpresult /r
 ```
 
 ## Findings
-- (To be updated as lab progresses)
+- DHCP reservations configured for all lab VMs:
+  - DC01: 172.16.1.10 (BC:24:11:20:19:82)
+  - CLIENT01: 172.16.1.11 (BC:24:11:F0:57:55)
+  - CLIENT02: 172.16.1.12 (BC:24:11:15:1F:81)
+- Windows firewall may block ICMP ping by default
 
 ## Troubleshooting Log
 - (To be updated as issues arise)
