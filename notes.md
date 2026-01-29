@@ -10,18 +10,73 @@
 
 ## Commands & Procedures
 
-### AD DS Installation (PowerShell)
+### Proxmox VM Creation
+
+```bash
+# Clone Server 2019 template (109) to create DC01
+qm clone 109 120 --name DC01 --full 1 --storage vm-disks
+
+# Update DC01 description
+qm set 120 --name DC01 --description 'Windows Server 2019 Domain Controller for home.lab'
+
+# Create CLIENT01 (Win11 with UEFI/Secure Boot)
+qm create 121 --name CLIENT01 \
+  --memory 4096 --cores 2 --cpu host \
+  --ostype win11 --machine q35 --bios ovmf \
+  --net0 virtio,bridge=vmbr0 \
+  --scsihw virtio-scsi-single \
+  --efidisk0 vm-disks:1,efitype=4m,pre-enrolled-keys=1 \
+  --scsi0 vm-disks:50,discard=on,ssd=1 \
+  --boot order=scsi0 \
+  --agent 1
+
+# Create CLIENT02 (same as CLIENT01)
+qm create 122 --name CLIENT02 \
+  --memory 4096 --cores 2 --cpu host \
+  --ostype win11 --machine q35 --bios ovmf \
+  --net0 virtio,bridge=vmbr0 \
+  --scsihw virtio-scsi-single \
+  --efidisk0 vm-disks:1,efitype=4m,pre-enrolled-keys=1 \
+  --scsi0 vm-disks:50,discard=on,ssd=1 \
+  --boot order=scsi0 \
+  --agent 1
+
+# Attach Win11 ISO and VirtIO drivers to client VMs
+qm set 121 --ide2 local:iso/Win11_unattended.iso,media=cdrom --ide0 local:iso/virtio-win.iso,media=cdrom
+qm set 122 --ide2 local:iso/Win11_unattended.iso,media=cdrom --ide0 local:iso/virtio-win.iso,media=cdrom
+
+# Start VMs
+qm start 120  # DC01
+qm start 121  # CLIENT01
+qm start 122  # CLIENT02
+
+# List lab VMs
+pvesh get /cluster/resources --type vm | grep -E "120|121|122"
+```
+
+### AD DS Installation (PowerShell on DC01)
 ```powershell
+# Set static IP first
+New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 172.16.1.10 -PrefixLength 24 -DefaultGateway 172.16.1.1
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 172.16.1.8
+
 # Install AD DS role
 Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
 
-# Promote to Domain Controller
-Install-ADDSForest -DomainName "yourdomain.local" -DomainNetbiosName "YOURDOMAIN" -InstallDns
+# Promote to Domain Controller for home.lab
+Install-ADDSForest -DomainName "home.lab" -DomainNetbiosName "HOME" -InstallDns -SafeModeAdministratorPassword (ConvertTo-SecureString "YourSafeModePassword!" -AsPlainText -Force) -Force
+
+# Configure DNS forwarder after reboot
+Add-DnsServerForwarder -IPAddress 172.16.1.8
 ```
 
-### Join Computer to Domain (PowerShell)
+### Join Computer to Domain (PowerShell on Clients)
 ```powershell
-Add-Computer -DomainName "yourdomain.local" -Credential (Get-Credential) -Restart
+# Set DNS to point to DC01
+Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 172.16.1.10
+
+# Join domain
+Add-Computer -DomainName "home.lab" -Credential (Get-Credential) -Restart
 ```
 
 ### Useful GPO Commands
@@ -33,7 +88,7 @@ Get-GPO -All
 New-GPO -Name "GPO Name"
 
 # Link GPO to OU
-New-GPLink -Name "GPO Name" -Target "OU=Computers,DC=yourdomain,DC=local"
+New-GPLink -Name "GPO Name" -Target "OU=Computers,DC=home,DC=lab"
 
 # Force GPO update on client
 gpupdate /force
