@@ -103,6 +103,9 @@ gpresult /r
   - CLIENT01: 172.16.1.11 (BC:24:11:F0:57:55)
   - CLIENT02: 172.16.1.12 (BC:24:11:15:1F:81)
 - Windows firewall may block ICMP ping by default
+- Win11 unattended ISO and VirtIO drivers attached to CLIENT01/CLIENT02
+  - Boot order set to IDE2 (Win11 ISO) first
+  - Local admin after install: SetupAdmin / TempPass123!
 
 ## Troubleshooting Log
 - (To be updated as issues arise)
