@@ -66,7 +66,7 @@ Install-ADDSForest -DomainName home.lab
 Add-DnsServerForwarder -IPAddress 172.16.1.8
 ```
 
-**Status:** DC01 promoted to domain controller for home.lab on 2026-01-30.
+**Status:** DC01 promoted to domain controller for home.lab on 2026-01-30. QEMU guest agent installed.
 
 ### Join Computer to Domain (PowerShell on Clients)
 ```powershell
