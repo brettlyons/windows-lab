@@ -56,19 +56,17 @@ pvesh get /cluster/resources --type vm | grep -E "120|121|122"
 
 ### AD DS Installation (PowerShell on DC01)
 ```powershell
-# Set static IP first
-New-NetIPAddress -InterfaceAlias "Ethernet" -IPAddress 172.16.1.10 -PrefixLength 24 -DefaultGateway 172.16.1.1
-Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 172.16.1.8
-
 # Install AD DS role
 Install-WindowsFeature -Name AD-Domain-Services -IncludeManagementTools
 
-# Promote to Domain Controller for home.lab
-Install-ADDSForest -DomainName "home.lab" -DomainNetbiosName "HOME" -InstallDns -SafeModeAdministratorPassword (ConvertTo-SecureString "YourSafeModePassword!" -AsPlainText -Force) -Force
+# Promote to Domain Controller (prompts for DSRM password)
+Install-ADDSForest -DomainName home.lab
 
 # Configure DNS forwarder after reboot
 Add-DnsServerForwarder -IPAddress 172.16.1.8
 ```
+
+**Status:** DC01 promoted to domain controller for home.lab on 2026-01-30.
 
 ### Join Computer to Domain (PowerShell on Clients)
 ```powershell
@@ -106,6 +104,21 @@ gpresult /r
 - Win11 unattended ISO and VirtIO drivers attached to CLIENT01/CLIENT02
   - Boot order set to IDE2 (Win11 ISO) first
   - Local admin after install: SetupAdmin / TempPass123!
+
+### QEMU Guest Agent Installation
+The virtio-win ISO includes the QEMU guest agent. On each Windows VM:
+
+```powershell
+# If virtio-win ISO is mounted as D:
+D:\guest-agent\qemu-ga-x86_64.msi /quiet
+
+# Or use the full virtio installer (includes drivers + agent)
+D:\virtio-win-gt-x64.msi /quiet
+```
+
+Alternatively via GUI: Open the virtio-win CD → run `virtio-win-gt-x64.msi`
+
+After install, the `QEMU Guest Agent` service should be running.
 
 ## Troubleshooting Log
 - (To be updated as issues arise)
