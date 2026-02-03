@@ -90,34 +90,32 @@ Fill these in before beginning the lab:
 - (None yet)
 
 ## Status
-**Currently in Phase 3** - DC01 promoted to domain controller. Awaiting client Windows installs.
+**Currently in Phase 3** - Awaiting client Windows 11 installs to complete, then domain join.
 
-### Completed
+### Completed (Phase 2)
 - DC01 promoted to domain controller for home.lab
-- DNS forwarder configured (172.16.1.8)
-- CLIENT01/CLIENT02 started, Windows 11 installing
+- DNS forwarder configured to 172.16.1.8
+- QEMU guest agent installed on DC01
+
+### In Progress (Phase 3)
+- CLIENT01/CLIENT02 created and started
+- Windows 11 unattended installation running on both clients
+- DHCP reservations configured (CLIENT01: 172.16.1.11, CLIENT02: 172.16.1.12)
 
 ### Immediate Next Steps
-1. **Run `Install-ADDS.ps1` on DC01** - The script is ready in `scripts/Install-ADDS.ps1`
-   - Connect to DC01 via RDP or console (IP: 172.16.1.10 or via DHCP reservation)
-   - Copy script to DC01 and run as Administrator
-   - Enter DSRM password when prompted
-   - Server will reboot automatically after promotion
-
-2. **After DC01 reboot - Configure DNS forwarder**
-   ```powershell
-   Add-DnsServerForwarder -IPAddress 172.16.1.8
-   ```
-
-3. **Start CLIENT01 and CLIENT02**
-   - ISOs already attached (Win11_unattended.iso + virtio-win.iso)
-   - Boot from IDE2 (Win11 ISO)
+1. **Wait for Windows 11 installation to complete on CLIENT01/CLIENT02**
+   - ISOs attached (Win11_unattended.iso + virtio-win.iso)
    - Auto-install will create local admin: SetupAdmin / TempPass123!
 
-4. **Join clients to domain**
+2. **Join clients to domain**
    ```powershell
    Set-DnsClientServerAddress -InterfaceAlias "Ethernet" -ServerAddresses 172.16.1.10
    Add-Computer -DomainName "home.lab" -Credential (Get-Credential) -Restart
+   ```
+
+3. **Install QEMU guest agent on clients** (after domain join)
+   ```powershell
+   D:\virtio-win-gt-x64.msi /quiet
    ```
 
 ### Verification
