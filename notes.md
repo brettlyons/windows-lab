@@ -19,13 +19,14 @@ qm clone 109 120 --name DC01 --full 1 --storage vm-disks
 # Update DC01 description
 qm set 120 --name DC01 --description 'Windows Server 2019 Domain Controller for home.lab'
 
-# Create CLIENT01 (Win11 with UEFI/Secure Boot)
+# Create CLIENT01 (Win11 with UEFI/Secure Boot/TPM)
 qm create 121 --name CLIENT01 \
   --memory 4096 --cores 2 --cpu host \
   --ostype win11 --machine q35 --bios ovmf \
   --net0 virtio,bridge=vmbr0 \
   --scsihw virtio-scsi-single \
   --efidisk0 vm-disks:1,efitype=4m,pre-enrolled-keys=1 \
+  --tpmstate0 vm-disks:1,version=v2.0 \
   --scsi0 vm-disks:50,discard=on,ssd=1 \
   --boot order=scsi0 \
   --agent 1
@@ -37,6 +38,7 @@ qm create 122 --name CLIENT02 \
   --net0 virtio,bridge=vmbr0 \
   --scsihw virtio-scsi-single \
   --efidisk0 vm-disks:1,efitype=4m,pre-enrolled-keys=1 \
+  --tpmstate0 vm-disks:1,version=v2.0 \
   --scsi0 vm-disks:50,discard=on,ssd=1 \
   --boot order=scsi0 \
   --agent 1
@@ -121,4 +123,23 @@ Alternatively via GUI: Open the virtio-win CD → run `virtio-win-gt-x64.msi`
 After install, the `QEMU Guest Agent` service should be running.
 
 ## Troubleshooting Log
-- (To be updated as issues arise)
+
+### Windows 11 "This PC doesn't meet requirements" (2026-02-04)
+**Problem:** CLIENT01/CLIENT02 stuck at "This PC doesn't meet Windows 11 requirements" screen.
+
+**Cause:** Missing TPM 2.0. Windows 11 requires TPM even in VMs.
+
+**Fix:** Add virtual TPM to each VM:
+```bash
+# Stop VMs first
+qm stop 121 && qm stop 122
+
+# Add TPM 2.0
+qm set 121 --tpmstate0 vm-disks:1,version=v2.0
+qm set 122 --tpmstate0 vm-disks:1,version=v2.0
+
+# Start VMs
+qm start 121 && qm start 122
+```
+
+**Prevention:** Include `--tpmstate0` in VM creation command for Win11 VMs.
