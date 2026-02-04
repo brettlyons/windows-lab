@@ -143,3 +143,16 @@ qm start 121 && qm start 122
 ```
 
 **Prevention:** Include `--tpmstate0` in VM creation command for Win11 VMs.
+
+### Windows can't find hard disk during install (2026-02-04)
+**Problem:** Windows installer doesn't see the VirtIO SCSI disk.
+
+**Cause:** Windows doesn't include VirtIO drivers out of the box.
+
+**Fix:** At "Where do you want to install Windows?" screen:
+1. Click "Load driver" → "Browse"
+2. Navigate to virtio-win CD (D: or E:)
+3. Select top-level `amd64` folder (contains all drivers)
+4. Click OK, select driver, click Next
+
+**Note:** The nested path `vioscsi\w11\amd64` also works, but top-level `amd64` is simpler.
