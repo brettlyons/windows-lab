@@ -152,7 +152,17 @@ qm start 121 && qm start 122
 **Fix:** At "Where do you want to install Windows?" screen:
 1. Click "Load driver" → "Browse"
 2. Navigate to virtio-win CD (D: or E:)
-3. Select top-level `amd64` folder (contains all drivers)
+3. Select `amd64\w11` folder
 4. Click OK, select driver, click Next
 
-**Note:** The nested path `vioscsi\w11\amd64` also works, but top-level `amd64` is simpler.
+### Windows install loops back to disk selection (2026-02-04)
+**Problem:** After copying files, VM reboots and returns to "Where do you want to install?" screen.
+
+**Cause:** Boot order has ISO (ide2) before disk (scsi0).
+
+**Fix:**
+```bash
+qm set 121 --boot order=scsi0
+qm set 122 --boot order=scsi0
+```
+VM will boot from disk on next reboot.
